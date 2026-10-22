@@ -1,0 +1,14 @@
+{% for r in roster %}
+<tr>
+  <td>{{ r.full_name }}</td>
+  <td>{{ r.student_id or '' }}</td>
+  <td>
+    {% if r.present_at %}<span class="badge ok">Present</span>{% else %}<span class="badge muted">Absent</span>{% endif %}
+    {% if not r.present_at and r.rejected_count %}<span class="badge warn">{{ r.rejected_count }} rejected</span>{% endif %}
+  </td>
+  <td>{% if r.present_at %}{{ r.present_at|dt }}{% elif r.last_reject %}{{ reason_label(r.last_reject) }}{% else %}&ndash;{% endif %}</td>
+  <td>{% if r.distance_m is not none %}{{ r.distance_m|round|int }} m{% else %}&ndash;{% endif %}</td>
+</tr>
+{% else %}
+<tr><td colspan="5" class="empty">No students are enrolled in this course yet.</td></tr>
+{% endfor %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Smart attendance{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <h1>A QR scan opens the door. Your location confirms you are in the room.</h1>
+    <p class="lead">AcityMark records attendance for Academic City University lectures. Students scan the lecturer's code,
+      and the server checks the code, the clock and the distance to the lecture room before marking anyone present.</p>
+    <p class="actions">
+      {% if g.user %}
+        <a class="btn" href="{{ url_for('dashboard') }}">Go to my dashboard</a>
+      {% else %}
+        <a class="btn" href="{{ url_for('login') }}">Log in</a>
+        <a class="btn btn-ghost" href="{{ url_for('register') }}">Create account</a>
+      {% endif %}
+    </p>
+  </div>
+  <ol class="steps">
+    <li><strong>Lecturer starts a session.</strong> A QR code appears with a countdown.</li>
+    <li><strong>Students scan it.</strong> Their phone asks to share its location once.</li>
+    <li><strong>The server decides.</strong> Code valid, not expired, enrolled, within range, not already marked.</li>
+  </ol>
+</section>
+<section class="panel">
+  <h2>What the location check can and cannot do</h2>
+  <p>It stops someone marking attendance from a hostel room or from home. It cannot prove exactly where a person
+    stands inside a building, and a determined student can fake a GPS reading. Treat it as a first filter, and use
+    the lecturer's attendance list to review anything unusual.</p>
+</section>
+{% endblock %}

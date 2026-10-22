@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% from "_macros.html" import stat %}
+{% block title %}{{ s.code }} session{% endblock %}
+{% block content %}
+{% set st = session_status(s) %}
+<p class="crumb"><a href="{{ url_for('lecturer_home') }}">Courses</a> / <a href="{{ url_for('course_detail', course_id=s.course_id) }}">{{ s.code }}</a> / Session</p>
+<div class="page-head">
+  <h1>{{ s.code }} attendance <span class="muted">{{ s.room_name }}</span></h1>
+  <a class="btn btn-ghost" href="{{ url_for('session_export', session_id=s.id) }}">Export CSV</a>
+</div>
+
+<div id="live" data-url="{{ url_for('session_live', session_id=s.id) }}" data-seconds="{{ seconds_left }}" data-status="{{ st }}">
+  <div class="session-grid">
+    <section class="panel qr-panel">
+      <div class="countdown" aria-live="off">
+        <span class="countdown-label" id="status-label">{{ 'Time left' if st == 'active' else ('Session closed' if st == 'closed' else 'Session expired') }}</span>
+        <span class="countdown-time" id="countdown">--:--</span>
+      </div>
+      {% if st == 'active' %}
+        <img class="qr" id="qr" src="{{ url_for('session_qr', session_id=s.id) }}" alt="QR code for students to scan" width="280" height="280">
+        <p class="hint">Students scan this in AcityMark or with their phone camera. Allowed distance: {{ s.radius_m|round|int }} m.</p>
+        <p class="url-line"><input readonly value="{{ attend_url }}" id="attend-url" aria-label="Attendance link"> <button class="btn btn-small btn-ghost" type="button" id="copy-url">Copy</button></p>
+        {% if local_only %}
+        <p class="notice warn">This link uses <code>localhost</code>, which phones cannot open. Set <code>PUBLIC_BASE_URL</code> or open this page using your computer's network address. See the README.</p>
+        {% endif %}
+        <form method="post" action="{{ url_for('session_close', session_id=s.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-danger" type="submit">Close session now</button>
+        </form>
+      {% else %}
+        <p class="empty">This session is no longer accepting attendance.</p>
+        <a class="btn" href="{{ url_for('course_detail', course_id=s.course_id) }}">Back to course</a>
+      {% endif %}
+    </section>
+
+    <div>
+      <section class="stats stats-2" aria-label="Session summary">
+        {{ stat('Students', stats.students, 'students') }}
+        {{ stat('Attendance rate', stats.rate ~ '%', 'rate') }}
+        {{ stat('Present', stats.present, 'present') }}
+        {{ stat('Absent', stats.absent, 'absent') }}
+      </section>
+      <section class="panel">
+        <h2>Attendance list</h2>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Name</th><th>Student ID</th><th>Status</th><th>Marked at / last problem</th><th>Distance</th></tr></thead>
+          <tbody id="roster">{% include "_roster_rows.html" %}</tbody>
+        </table></div>
+        <p class="hint">Updates every few seconds while the page is open.</p>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/session.js') }}" defer></script>{% endblock %}

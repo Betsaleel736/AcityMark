@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Scan QR{% endblock %}
+{% block content %}
+<section class="panel narrow">
+  <h1>Scan the attendance QR code</h1>
+  <p>Point your camera at the code your lecturer is showing. You will be asked to share your location on the next screen.</p>
+  <div id="reader" class="reader" aria-label="Camera view"></div>
+  <p class="actions">
+    <button class="btn" type="button" id="start-scan">Start camera</button>
+    <button class="btn btn-ghost" type="button" id="stop-scan" hidden>Stop camera</button>
+  </p>
+  <div id="scan-message" class="notice" role="status" hidden></div>
+
+  <h2>Camera not working?</h2>
+  <p class="hint">Paste the attendance link your lecturer shared, or open the QR code with your phone's own camera app.</p>
+  <form id="manual-form" novalidate>
+    <label for="manual">Attendance link or code</label>
+    <input id="manual" autocomplete="off" spellcheck="false">
+    <button class="btn btn-ghost" type="submit">Continue</button>
+  </form>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js" defer></script>
+<script src="{{ url_for('static', filename='js/scan.js') }}" defer></script>
+{% endblock %}

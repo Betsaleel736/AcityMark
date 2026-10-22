@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% from "_macros.html" import stat %}
+{% block title %}{{ course.code }}{% endblock %}
+{% block content %}
+<p class="crumb"><a href="{{ url_for('lecturer_home') }}">Courses</a> / {{ course.code }}</p>
+<div class="page-head">
+  <h1>{{ course.code }} <span class="muted">{{ course.title }}</span></h1>
+  <a class="btn btn-ghost" href="{{ url_for('course_export', course_id=course.id) }}">Export all sessions (CSV)</a>
+</div>
+
+<section class="stats" aria-label="Attendance summary for this course">
+  {{ stat('Students', stats.students) }}
+  {{ stat('Attendance rate', stats.rate ~ '%') }}
+  {{ stat('Present', stats.present, hint='Approved check-ins') }}
+  {{ stat('Absent', stats.absent, hint='Missed check-ins') }}
+</section>
+
+<div class="grid-2">
+  <section class="panel">
+    <h2>Start an attendance session</h2>
+    {% if course.room_lat is none %}
+      <p class="notice warn">Register the lecture room first. Sessions need a location to check against.</p>
+    {% else %}
+    <form method="post" action="{{ url_for('session_start', course_id=course.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="minutes">QR code stays valid for (minutes)</label>
+      <input id="minutes" name="minutes" type="number" min="1" max="{{ max_minutes }}" value="{{ default_minutes }}" required>
+      <p class="hint">Starting a new session closes the previous one.</p>
+      <button class="btn" type="submit">Start session</button>
+    </form>
+    {% endif %}
+  </section>
+
+  <section class="panel">
+    <h2>Lecture room</h2>
+    <form method="post" action="{{ url_for('course_room', course_id=course.id) }}" id="room-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="room_name">Room name</label>
+      <input id="room_name" name="room_name" value="{{ course.room_name or '' }}" placeholder="Lecture Hall B" maxlength="80" required>
+      <div class="row">
+        <div><label for="latitude">Latitude</label>
+          <input id="latitude" name="latitude" inputmode="decimal" value="{{ course.room_lat if course.room_lat is not none else '' }}" required></div>
+        <div><label for="longitude">Longitude</label>
+          <input id="longitude" name="longitude" inputmode="decimal" value="{{ course.room_lng if course.room_lng is not none else '' }}" required></div>
+      </div>
+      <button type="button" class="btn btn-ghost btn-small" id="use-location">Use my current location</button>
+      <span class="hint" id="location-status" role="status"></span>
+      <label for="radius_m">Allowed distance from the room (metres)</label>
+      <input id="radius_m" name="radius_m" type="number" min="10" max="500" step="1" value="{{ course.radius_m|round|int }}" required>
+      <p class="hint">Stand in the room when you use your current location. Indoor GPS drifts, so very small radiuses reject honest students.</p>
+      <button class="btn" type="submit">Save room</button>
+    </form>
+  </section>
+</div>
+
+<div class="grid-2">
+  <section class="panel">
+    <h2>Enrolled students ({{ students|length }})</h2>
+    <form method="post" action="{{ url_for('course_enroll', course_id=course.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="students">Add students by email or student ID</label>
+      <textarea id="students" name="students" rows="3" placeholder="One per line, or separated by commas"></textarea>
+      <button class="btn btn-small" type="submit">Enroll</button>
+    </form>
+    {% if students %}
+    <div class="table-wrap"><table>
+      <thead><tr><th>Name</th><th>Student ID</th><th></th></tr></thead>
+      <tbody>
+      {% for s in students %}
+        <tr><td>{{ s.full_name }}<br><span class="muted">{{ s.email }}</span></td><td>{{ s.student_id or '' }}</td>
+          <td><form method="post" action="{{ url_for('course_unenroll', course_id=course.id, student_id=s.id) }}" class="inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="link-btn danger" type="submit" aria-label="Remove {{ s.full_name }}">Remove</button></form></td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    {% else %}
+    <p class="empty">No students yet. Students must create an account first, then you can enroll them here.</p>
+    {% endif %}
+  </section>
+
+  <section class="panel">
+    <h2>Sessions</h2>
+    {% if sessions %}
+    <div class="table-wrap"><table>
+      <thead><tr><th>Started</th><th>Status</th><th>Present</th><th></th></tr></thead>
+      <tbody>
+      {% for s in sessions %}{% set st = session_status(s) %}
+        <tr><td>{{ s.starts_at|dt }}</td>
+          <td><span class="badge {{ 'ok' if st == 'active' else 'muted' }}">{{ st|capitalize }}</span></td>
+          <td>{{ s.present }}</td>
+          <td><a href="{{ url_for('session_view', session_id=s.id) }}">Open</a></td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    {% else %}
+    <p class="empty">No sessions yet. Start one when your class begins.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

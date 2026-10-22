@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Mark attendance{% endblock %}
+{% block content %}
+<section class="panel narrow">
+  {% if state == 'invalid' %}
+    <h1>QR code not recognised</h1>
+    <p>This is not a valid AcityMark attendance code. Scan the code on your lecturer's screen again.</p>
+    <a class="btn" href="{{ url_for('student_scan') }}">Scan again</a>
+  {% elif state != 'active' %}
+    <h1>{{ sess.code }}: session {{ 'closed' if state == 'closed' else 'expired' }}</h1>
+    <p>This attendance session is no longer open. Ask your lecturer to start a new one.</p>
+    <a class="btn" href="{{ url_for('student_home') }}">Back to my courses</a>
+  {% else %}
+    <h1>Mark attendance for {{ sess.code }}</h1>
+    <p class="muted">{{ sess.title }}{% if sess.room_name %}, {{ sess.room_name }}{% endif %}</p>
+    <p>Press the button and allow location access when your phone asks. AcityMark checks that you are near the lecture
+      room and keeps only the distance, not your coordinates.</p>
+    <button class="btn block" type="button" id="mark-btn" data-token="{{ token }}">Share location and mark attendance</button>
+    <div id="result" class="notice" role="status" aria-live="polite" hidden></div>
+  {% endif %}
+</section>
+{% endblock %}
+{% block scripts %}{% if state == 'active' %}<script src="{{ url_for('static', filename='js/attend.js') }}" defer></script>{% endif %}{% endblock %}

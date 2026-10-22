@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}History{% endblock %}
+{% block content %}
+<h1>Attendance history</h1>
+<section class="panel">
+  {% if records %}
+  <div class="table-wrap"><table>
+    <thead><tr><th>When</th><th>Course</th><th>Result</th><th>Detail</th></tr></thead>
+    <tbody>
+    {% for r in records %}
+      <tr><td>{{ r.submitted_at|dt }}</td>
+        <td><strong>{{ r.code }}</strong><br><span class="muted">{{ r.title }}</span></td>
+        <td>{% if r.status == 'approved' %}<span class="badge ok">Approved</span>{% else %}<span class="badge bad">Rejected</span>{% endif %}</td>
+        <td>{% if r.status == 'approved' %}{{ r.distance_m|round|int }} m from the room{% else %}{{ reason_label(r.reason) }}{% if r.distance_m is not none %} ({{ r.distance_m|round|int }} m){% endif %}{% endif %}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}
+  <p class="empty">No attendance attempts yet. Scan a QR code during a lecture and your result will appear here.</p>
+  {% endif %}
+</section>
+{% endblock %}

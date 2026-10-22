@@ -1,0 +1,7 @@
+{% macro stat(label, value, key='', hint='') %}
+<div class="stat">
+  <div class="stat-label">{{ label }}</div>
+  <div class="stat-value" {% if key %}data-stat="{{ key }}"{% endif %}>{{ value }}</div>
+  {% if hint %}<div class="stat-hint">{{ hint }}</div>{% endif %}
+</div>
+{% endmacro %}

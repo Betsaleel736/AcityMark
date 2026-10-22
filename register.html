@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Create account{% endblock %}
+{% block content %}
+<section class="panel narrow">
+  <h1>Create your account</h1>
+  {% if errors %}
+  <div class="notice bad" role="alert"><ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul></div>
+  {% endif %}
+  <form method="post" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <fieldset>
+      <legend>I am a</legend>
+      <label class="choice"><input type="radio" name="role" value="student" {{ 'checked' if values.get('role', 'student') == 'student' }}> Student</label>
+      <label class="choice"><input type="radio" name="role" value="lecturer" {{ 'checked' if values.get('role') == 'lecturer' }}> Lecturer</label>
+    </fieldset>
+    <label for="full_name">Full name</label>
+    <input id="full_name" name="full_name" value="{{ values.get('full_name', '') }}" autocomplete="name" required>
+    <label for="email">Email</label>
+    <input id="email" name="email" type="email" value="{{ values.get('email', '') }}" autocomplete="email" required>
+    <div data-role-field="student">
+      <label for="student_id">Student ID</label>
+      <input id="student_id" name="student_id" value="{{ values.get('student_id', '') }}">
+    </div>
+    <div data-role-field="lecturer" hidden>
+      <label for="invite_code">Lecturer invite code</label>
+      <input id="invite_code" name="invite_code" autocomplete="off">
+      <p class="hint">Ask the department for the code. It stops students creating lecturer accounts.</p>
+    </div>
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" minlength="8" autocomplete="new-password" required>
+    <p class="hint">At least 8 characters.</p>
+    <label for="confirm">Confirm password</label>
+    <input id="confirm" name="confirm" type="password" autocomplete="new-password" required>
+    <button class="btn block" type="submit">Create account</button>
+  </form>
+  <p class="muted">Already registered? <a href="{{ url_for('login') }}">Log in</a></p>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/register.js') }}" defer></script>{% endblock %}

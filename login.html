@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Log in{% endblock %}
+{% block page %}
+<div class="auth">
+  <aside class="auth-art" aria-hidden="true">
+    <svg viewBox="0 0 180 180" class="art-svg" role="presentation">
+      <g fill="none" stroke="currentColor" stroke-width="6">
+        <rect x="6" y="6" width="36" height="36" rx="3"/><rect x="138" y="6" width="36" height="36" rx="3"/><rect x="6" y="138" width="36" height="36" rx="3"/>
+      </g>
+      <g fill="currentColor">
+        <rect x="16" y="16" width="16" height="16"/><rect x="148" y="16" width="16" height="16"/><rect x="16" y="148" width="16" height="16"/>
+        <rect x="60" y="8" width="10" height="10"/><rect x="80" y="8" width="10" height="10"/><rect x="100" y="18" width="10" height="10"/>
+        <rect x="8" y="60" width="10" height="10"/><rect x="28" y="70" width="10" height="10"/><rect x="8" y="100" width="10" height="10"/>
+        <rect x="60" y="28" width="10" height="10"/><rect x="120" y="60" width="10" height="10"/><rect x="150" y="70" width="10" height="10"/>
+        <rect x="160" y="110" width="10" height="10"/><rect x="140" y="140" width="10" height="10"/><rect x="120" y="160" width="10" height="10"/>
+        <rect x="80" y="160" width="10" height="10"/><rect x="60" y="150" width="10" height="10"/><rect x="100" y="140" width="10" height="10"/>
+      </g>
+      <g fill="none" stroke="#E0B554" stroke-width="2.5">
+        <circle cx="90" cy="90" r="46" stroke-dasharray="3 6"/><circle cx="90" cy="90" r="26"/>
+      </g>
+      <circle cx="90" cy="90" r="7" fill="#E0B554"/>
+    </svg>
+    <p class="art-caption">Scan the code. Be in the room.</p>
+  </aside>
+  <main id="main" class="auth-form">
+    <a class="brand dark" href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='img/logo.svg') }}" alt="" width="32" height="32"><span>AcityMark</span></a>
+    <h1>Log in</h1>
+    {% include "_flash.html" %}
+    {% if error %}<div class="notice bad" role="alert">{{ error }}</div>{% endif %}
+    <form method="post" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" autocomplete="username" required autofocus>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <button class="btn block" type="submit">Log in</button>
+    </form>
+    <p class="muted">New here? <a href="{{ url_for('register') }}">Create an account</a></p>
+  </main>
+</div>
+{% endblock %}
